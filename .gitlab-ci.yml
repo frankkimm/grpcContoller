@@ -1,0 +1,42 @@
+variables:
+  JAVA_IMAGE: openjdk:21-jdk-slim
+
+# https://docs.gitlab.com/ee/ci/caching/#sharing-caches-across-the-same-branch
+.cache: &cache
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .gradle
+
+stages:
+  - build
+  - test
+
+build:
+  image: $JAVA_IMAGE
+  stage: build
+  script:
+    - cd $CI_PROJECT_DIR/
+    - ./gradlew assemble
+  cache:
+    <<: *cache
+    policy: pull-push
+  artifacts:
+    name: "build-$CI_COMMIT_SHA"
+    paths:
+      - "**/build"
+      - version
+    expire_in: 45 mins
+
+test:
+  image: $JAVA_IMAGE
+  stage: test
+  script:
+    - cd $CI_PROJECT_DIR/
+    - ./gradlew test
+  retry: 1
+  artifacts:
+    paths:
+      - ${CI_PROJECT_DIR}/app/build/reports/jacoco/test/jacocoTestReport.xml
+    reports:
+      junit: '**/build/test-results/test/TEST-*.xml'
+    expire_in: 45 mins

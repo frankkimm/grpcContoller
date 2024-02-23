@@ -1,0 +1,26 @@
+syntax = "proto3";
+import "Common.proto";
+
+option java_package = "de.kimmlingen.controller.grpc.model";
+option java_outer_classname = "ServiceProto";
+option java_multiple_files = true;
+
+service Service {
+  rpc send(Request) returns (Response);
+  rpc streamMultipleRequests(stream Request) returns (stream Response);
+  rpc streamSingleRequest (Request) returns (stream Response);
+}
+
+message Request {
+  de.kimmlingen.controller.grpc.common.CommonHeader commonHeader = 1;
+  string username = 2;
+  string password = 3;
+  string org = 4;
+  bool isGitHubMocked = 5;
+}
+
+message Response {
+  de.kimmlingen.controller.grpc.common.CommonHeader commonHeader = 1;
+  string org = 2;
+  string responseBody = 3;
+}
